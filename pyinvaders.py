@@ -5,8 +5,8 @@ import random
 ###TODO###
 # Add a score counter => Done
 # Check for missile-to-missile collisions.
-# Add a second row of aliens
-# Remove magic numbers
+# Add a second row of aliens DONE
+# Remove magic numbers and clean up
 # Publish to github mentioning the changes
 
 class Sprite:
@@ -26,8 +26,8 @@ class Sprite:
         screen.blit(self.bitmap, (self.x, self.y))
 
 
-def intersect(s1_x, s1_y, s2_x, s2_y):
-    if (s1_x > s2_x - Sprite.SIZE) and (s1_x < s2_x + Sprite.SIZE) and (s1_y > s2_y - Sprite.SIZE) and (s1_y < s2_y + Sprite.SIZE):
+def intersect(s1_x, s1_y, s2_x, s2_y, object_size):
+    if (s1_x > s2_x - object_size) and (s1_x < s2_x + object_size) and (s1_y > s2_y - object_size) and (s1_y < s2_y + object_size):
         return 1
     else:
         return 0
@@ -43,18 +43,26 @@ backdrop = image.load('data/backdrop.bmp')
 
 score = 0
 myfont = font.SysFont("monospace", 16)
+rows_of_enemies = 2
+vertical_offset_enemies_rows = 50
+count_enemies = 10
+horizontal_distance_enemies = 50
+hero_initial_xpos = 20
+hero_initial_ypos = 400
+
 
 enemies = []
 
-x = 0
+for row in range(rows_of_enemies):
+    x = 0
+    for count in range(count_enemies):
+        enemies.append(Sprite(horizontal_distance_enemies * x + horizontal_distance_enemies,
+                              vertical_offset_enemies_rows + (row + 1) * vertical_offset_enemies_rows, 'data/baddie.bmp'))
+        x += 1
 
-for count in range(10):
-    enemies.append(Sprite(50 * x + 50, 50, 'data/baddie.bmp'))
-    x += 1
-
-hero = Sprite(20, 400, 'data/hero.bmp')
-ourmissile = Sprite(0, 480, 'data/heromissile.bmp')
-enemymissile = Sprite(0, 480, 'data/baddiemissile.bmp')
+hero = Sprite(hero_initial_xpos, hero_initial_ypos, 'data/hero.bmp')
+ourmissile = Sprite(0, window_height, 'data/heromissile.bmp')
+enemymissile = Sprite(0, window_height, 'data/baddiemissile.bmp')
 enemy_rightmost_bound = 590
 enemy_leftmost_bound = 10
 
@@ -94,11 +102,11 @@ while quit == 0:
         enemymissile.x = enemies[random.randint(0, len(enemies) - 1)].x
         enemymissile.y = enemies[0].y
 
-    if intersect(hero.x, hero.y, enemymissile.x, enemymissile.y):
+    if intersect(hero.x, hero.y, enemymissile.x, enemymissile.y, Sprite.SIZE):
         quit = 1
 
     for count in range(0, len(enemies)):
-        if intersect(ourmissile.x, ourmissile.y, enemies[count].x, enemies[count].y):
+        if intersect(ourmissile.x, ourmissile.y, enemies[count].x, enemies[count].y, Sprite.SIZE):
             del enemies[count]
             score += killed_enemy_points
             break
